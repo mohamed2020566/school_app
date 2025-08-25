@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إعادة تعيين كلمة المرور</title>
+<style>
+:root{--bg:#0f172a;--card:#111827}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.page{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px;background:radial-gradient(80% 50% at 50% 50%,#0f172a,#0b1020)}
+.card{background:#111827;border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:420px;width:100%}
+.input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0a0f1f;color:#e5e7eb}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+a{color:#8dd3ff}
+.flash{margin:12px 0}.flash .item{padding:10px;border-radius:10px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="card">
+    <h1>إعادة تعيين كلمة المرور</h1>
+    <form method="post">
+      <label>كلمة المرور الجديدة</label>
+      <input class="input" type="password" name="new" required>
+      <label>تأكيد كلمة المرور</label>
+      <input class="input" type="password" name="confirm" required>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+        <button class="btn" type="submit">حفظ</button>
+        <a href="{{ url_for('login') }}">إلغاء</a>
+      </div>
+    </form>
+    <div class="flash">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}{% for cat, msg in msgs %}<div class="item {{cat}}">{{ msg }}</div>{% endfor %}{% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+</body>
+</html>
