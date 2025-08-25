@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الرئيسية</title>
+<style>
+:root{--bg:#0f172a;--card:#111827}
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+h1,h2{margin:0 0 12px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:10}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav .user{color:#a3a3a3;margin-inline-end:8px}
+.grid{display:grid;gap:16px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+.ok{background:rgba(34,197,94,.15);color:#22c55e}
+.err{background:rgba(239,68,68,.15);color:#ef4444}
+.small{font-size:12px;color:#9ca3af}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="left">
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('classes') }}">الأقسام</a>
+    <a href="{{ url_for('students') }}">التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">الحضور والغياب</a>
+    <a href="{{ url_for('reports') }}">التقارير</a>
+    <a href="{{ url_for('settings') }}">الإعدادات</a>
+  </div>
+  <div class="right">
+    <span class="user">👤 {{ session.get('username') }}</span>
+    <a href="{{ url_for('logout') }}">تسجيل الخروج</a>
+    <a href="{{ url_for('pricing') }}">💳 الاشتراك</a>
+  </div>
+</nav>
+
+<div class="container grid grid-3">
+  <div class="card">
+    <h2>التلاميذ</h2>
+    <div style="font-size:36px;font-weight:800">{{ students_count }}</div>
+    <p class="small">إجمالي عدد التلاميذ المسجلين</p>
+  </div>
+  <div class="card">
+    <h2>الأقسام</h2>
+    <div style="font-size:36px;font-weight:800">{{ classes_count }}</div>
+    <p class="small">إجمالي عدد الأقسام</p>
+  </div>
+  <div class="card">
+    <h2>اختصارات</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="{{ url_for('students') }}">إضافة تلميذ</a>
+      <a class="btn" href="{{ url_for('classes') }}">إدارة الأقسام</a>
+      <a class="btn" href="{{ url_for('grades_page') }}">تسجيل الدرجات</a>
+      <a class="btn" href="{{ url_for('attendance_page') }}">تسجيل الحضور</a>
+      <a class="btn" href="{{ url_for('reports') }}">التقارير</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>تنبيهات الحضور (آخر ٧ أيام)</h2>
+    <table class="table">
+      <thead><tr><th>الاسم</th><th>القسم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+      <tbody>
+        {% for a in alerts %}
+          <tr>
+            <td>{{ a['name'] }}</td>
+            <td>{{ a['class_name'] or '—' }}</td>
+            <td>{{ a['date'] }}</td>
+            <td>
+              {% if a['status'] == 'absent' %}
+                <span class="badge err">غياب</span>
+              {% elif a['status'] == 'late' %}
+                <span class="badge" style="background:rgba(234,179,8,.18);color:#fde68a">تأخر</span>
+              {% else %}
+                <span class="badge ok">حضور</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="small">لا يوجد تنبيهات</td></tr>
+        {% endfor %}
+        {% if not sub_active %}
+        <div class="card" style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;margin-bottom:16px">
+            {% if on_trial %}
+            <p>🎉 التجربة شغّالة — يمكنك الاستمرار فورًا بالاشتراك الشهري لتفادي انقطاع الخدمة بعد انتهاء التجربة.</p>
+            {% else %}
+            <p>🔐 ليس لديك اشتراك نشط حاليًا. فعّل الاشتراك الشهري للاستفادة من كل الميزات.</p>
+            {% endif %}
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="{{ url_for('pricing') }}" style="text-decoration:none">
+                <button type="button" style="background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:bold">
+                💳 الذهاب لصفحة الاشتراك
+                </button>
+            </a>
+            <!-- زر دفع مباشر (اختياري) -->
+            <form method="post" action="{{ url_for('pay_start') }}">
+                <button type="submit" style="background:#16a34a;border:none;color:#00170a;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:bold">
+                ✅ اشترك الآن (Edahabia/CIB)
+                </button>
+            </form>
+            </div>
+            <p style="font-size:12px;color:#9ca3af;margin-top:8px">ستُفعّل الخدمة تلقائيًا فور إتمام الدفع.</p>
+        </div>
+        {% endif %}
+
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
