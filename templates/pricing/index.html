@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الاشتراك</title>
+<style>
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.container{max-width:960px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.col{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+.small{font-size:12px;color:#9ca3af}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(34,197,94,.15);color:#22c55e}
+.flash{margin:12px 0}.flash .item{padding:10px;border-radius:10px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('pricing') }}">الاشتراك</a>
+    <a href="{{ url_for('account') }}">حسابي</a>
+  </div>
+  <div>👤 {{ session.get('username') or session.get('email') }} | <a href="{{ url_for('logout') }}">خروج</a></div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>خطة المدرسة</h1>
+    <p>كل المزايا: إدارة التلاميذ، الأقسام، الدرجات، الحضور، التقارير.</p>
+    <div class="col">
+      <div>
+        <h2>تجربة مجانية 7 أيام</h2>
+        {% if on_trial %}
+          <p class="badge">التجربة نشطة ✅</p>
+        {% elif trial_used %}
+          <p class="small">لقد استخدمت التجربة من قبل.</p>
+        {% else %}
+          <form method="post" action="{{ url_for('subscribe') }}">
+            <input type="hidden" name="action" value="start_trial">
+            <button class="btn" type="submit">ابدأ التجربة الآن</button>
+          </form>
+        {% endif %}
+      </div>
+      <div>
+        <h2>اشتراك شهري</h2>
+        <p>السعر: {{ monthly_price }} دج / شهر</p>
+        {% if sub %}
+        <p class="badge">اشتراك نشط حتى {{ sub['current_period_end'] }}</p>
+        {% if sub['cancel_at_period_end'] == 0 %}
+            <form method="post" action="{{ url_for('subscribe') }}">
+            <input type="hidden" name="action" value="cancel">
+            <button class="btn" type="submit" style="background:#0a0f1f;color:#e5e7eb;border:1px solid rgba(255,255,255,.1)">إلغاء عند نهاية الفترة</button>
+            </form>
+        {% else %}
+            <p class="small">سيتم الإلغاء عند نهاية الفترة الحالية.</p>
+        {% endif %}
+        {% else %}
+        <form method="post" action="{{ url_for('pay_start') }}">
+            <button class="btn" type="submit">ادفع الآن بـ Edahabia/CIB</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="flash">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat, msg in msgs %}
+            <div class="item {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+</body>
+</html>
