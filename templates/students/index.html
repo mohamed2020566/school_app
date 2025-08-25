@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>التلاميذ</title>
+<style>
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.nav a:hover{background:rgba(255,255,255,.08)}
+.container{max-width:1000px;margin:24px auto;padding:0 16px}
+.card{background:#111827;border-radius:16px;padding:20px;margin-bottom:20px}
+h1{margin-top:0}
+input,select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#0a0f1f;color:#e5e7eb}
+button{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:bold}
+button:hover{opacity:.9}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.1);text-align:right}
+tr:hover{background:rgba(255,255,255,.05)}
+.flash{margin:12px 0}
+.flash .item{padding:10px;border-radius:10px;margin-bottom:8px}
+.flash .ok{background:rgba(34,197,94,.12);color:#bbf7d0}
+.flash .error{background:rgba(239,68,68,.12);color:#fecaca}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">🏠 الرئيسية</a>
+    <a href="{{ url_for('classes') }}">📚 الأقسام</a>
+    <a href="{{ url_for('students') }}">👨‍🎓 التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">📝 التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">📅 الحضور</a>
+    <a href="{{ url_for('reports') }}">📊 التقارير</a>
+    <a href="{{ url_for('settings') }}">⚙️ الإعدادات</a>
+  </div>
+  <div>👤 {{ session.get('username') or session.get('email') }} | <a href="{{ url_for('logout') }}">خروج</a></div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>قائمة التلاميذ</h1>
+
+    <!-- البحث -->
+    <form method="get">
+      <input type="text" name="q" placeholder="🔎 بحث عن تلميذ..." value="{{ search }}">
+      <button type="submit">بحث</button>
+    </form>
+
+    <!-- إضافة تلميذ -->
+    <h2>➕ إضافة تلميذ جديد</h2>
+    <form method="post">
+      <input type="text" name="first_name" placeholder="الاسم" required>
+      <input type="text" name="last_name" placeholder="اللقب" required>
+      <input type="date" name="birthdate">
+      <select name="class_id">
+        <option value="">-- القسم --</option>
+        {% for c in classes %}
+        <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="phone" placeholder="رقم الهاتف">
+      <input type="text" name="guardian_name" placeholder="اسم ولي الأمر">
+      <button type="submit">إضافة</button>
+    </form>
+
+    <!-- رسائل فلاش -->
+    <div class="flash">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat, msg in msgs %}
+            <div class="item {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- جدول التلاميذ -->
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>اللقب</th>
+          <th>القسم</th>
+          <th>الهاتف</th>
+          <th>ولي الأمر</th>
+          <th>عمليات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.first_name }}</td>
+          <td>{{ s.last_name }}</td>
+          <td>{{ s.class_name or "-" }}</td>
+          <td>{{ s.phone or "-" }}</td>
+          <td>{{ s.guardian_name or "-" }}</td>
+          <td>
+            <a href="{{ url_for('student_profile', student_id=s.id) }}">📄 الملف</a>
+            <form method="post" action="{{ url_for('delete_student', student_id=s.id) }}" style="display:inline" onsubmit="return confirm('حذف التلميذ؟');">
+              <button type="submit">🗑 حذف</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">لا يوجد تلاميذ مسجلين.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
