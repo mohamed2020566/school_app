@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>التقارير</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0a0f1f;color:#e5e7eb}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+.small{font-size:12px;color:#9ca3af}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('classes') }}">الأقسام</a>
+    <a href="{{ url_for('students') }}">التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">الحضور والغياب</a>
+    <a href="{{ url_for('reports') }}">التقارير</a>
+    <a href="{{ url_for('settings') }}">الإعدادات</a>
+  </div>
+  <div><a href="{{ url_for('logout') }}">تسجيل الخروج</a></div>
+</nav>
+
+<div class="container card">
+  <h2>التقارير</h2>
+  <form method="get" style="display:flex;gap:8px;align-items:end;margin:8px 0">
+    <div style="flex:1">
+      <label>القسم</label>
+      <select class="input" name="class_id">
+        <option value="">— اختر القسم —</option>
+        {% for c in classes %}
+          <option value="{{ c['id'] }}" {% if selected_class_id|string == c['id']|string %}selected{% endif %}>{{ c['name'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn" type="submit">تحديث</button>
+  </form>
+
+  {% if selected_class_id %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="{{ url_for('report_class_grades_csv', class_id=selected_class_id) }}">درجات القسم (CSV)</a>
+      <a class="btn" href="{{ url_for('report_class_attendance_csv', class_id=selected_class_id) }}">حضور/غياب القسم (CSV)</a>
+    </div>
+    <p class="small">لفتح CSV في Excel مباشرة. لطباعة PDF: افتح التقرير ثم استخدم "طباعة" → "حفظ بتنسيق PDF".</p>
+  {% else %}
+    <p class="small">اختر قسمًا لإظهار روابط التقارير.</p>
+  {% endif %}
+</div>
+</body>
+</html>
