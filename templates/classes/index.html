@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الأقسام</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+.input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0a0f1f;color:#e5e7eb}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right}
+.flash{margin:12px 0}.flash .item{padding:10px;border-radius:10px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('classes') }}">الأقسام</a>
+    <a href="{{ url_for('students') }}">التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">الحضور والغياب</a>
+    <a href="{{ url_for('reports') }}">التقارير</a>
+    <a href="{{ url_for('settings') }}">الإعدادات</a>
+  </div>
+  <div><a href="{{ url_for('logout') }}">تسجيل الخروج</a></div>
+</nav>
+
+<div class="container grid">
+  <div class="card">
+    <h2>إضافة قسم</h2>
+    <form method="post" style="margin-top:8px">
+      <label>اسم القسم</label>
+      <input class="input" type="text" name="name" required>
+      <div style="margin-top:12px">
+        <button class="btn" type="submit">حفظ</button>
+      </div>
+    </form>
+    <div class="flash">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}{% for cat, msg in msgs %}<div class="item {{cat}}">{{ msg }}</div>{% endfor %}{% endif %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>كل الأقسام</h2>
+    <table class="table">
+      <thead><tr><th>الاسم</th><th>إجراءات</th></tr></thead>
+      <tbody>
+        {% for c in classes %}
+          <tr>
+            <td>{{ c['name'] }}</td>
+            <td style="display:flex;gap:6px;justify-content:flex-end">
+              <form method="post" action="{{ url_for('delete_class', class_id=c['id']) }}" onsubmit="return confirm('حذف القسم؟');">
+                <button class="btn" type="submit" style="background:#0a0f1f;color:#e5e7eb;border:1px solid rgba(255,255,255,.1)">حذف</button>
+              </form>
+              <form method="post" action="{{ url_for('edit_class', class_id=c['id']) }}">
+                <input class="input" style="max-width:200px" name="name" placeholder="اسم جديد">
+                <button class="btn" type="submit">تعديل</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="2">لا يوجد أقسام</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
