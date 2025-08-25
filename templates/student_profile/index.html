@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ملف التلميذ</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+.ok{background:rgba(34,197,94,.15);color:#22c55e}
+.err{background:rgba(239,68,68,.15);color:#ef4444}
+.small{font-size:12px;color:#9ca3af}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('classes') }}">الأقسام</a>
+    <a href="{{ url_for('students') }}">التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">الحضور والغياب</a>
+    <a href="{{ url_for('reports') }}">التقارير</a>
+    <a href="{{ url_for('settings') }}">الإعدادات</a>
+  </div>
+  <div><a href="{{ url_for('logout') }}">تسجيل الخروج</a></div>
+</nav>
+
+<div class="container grid">
+  <div class="card">
+    <h2>معلومات التلميذ</h2>
+    {% if s %}
+    <p><b>الاسم:</b> {{ s['first_name'] }} {{ s['last_name'] }}</p>
+    <p><b>القسم:</b> {{ s['class_name'] or '—' }}</p>
+    <p><b>تاريخ الميلاد:</b> {{ s['birthdate'] or '—' }}</p>
+    <p><b>الهاتف:</b> {{ s['phone'] or '—' }}</p>
+    <p><b>ولي الأمر:</b> {{ s['guardian_name'] or '—' }}</p>
+    {% endif %}
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="{{ url_for('student_export_csv', student_id=s['id']) }}">تنزيل تقرير CSV</a>
+      <a class="btn" style="background:#0a0f1f;color:#e5e7eb;border:1px solid rgba(255,255,255,.1)" href="#" onclick="window.print()">طباعة / حفظ PDF</a>
+    </div>
+  </div>
+  <div class="card">
+    <h2>المعدل العام</h2>
+    {% if avg_score is not none %}
+      <div style="font-size:36px;font-weight:800">{{ '%.2f'|format(avg_score) }}</div>
+      <p class="small">متوسط الدرجات</p>
+    {% else %}
+      <p class="small">لا توجد درجات بعد</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>الدرجات</h2>
+    <table class="table">
+      <thead><tr><th>المادة</th><th>الفصل</th><th>الدرجة</th><th>التاريخ</th></tr></thead>
+      <tbody>
+        {% for g in grades %}
+          <tr>
+            <td>{{ g['subject_name'] }}</td>
+            <td>{{ g['term'] }}</td>
+            <td>{{ g['score'] }}</td>
+            <td>{{ g['created_at'] }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="small">لا توجد درجات</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>الحضور والغياب</h2>
+    <table class="table">
+      <thead><tr><th>التاريخ</th><th>الحالة</th></tr></thead>
+      <tbody>
+        {% for a in attendance %}
+          <tr>
+            <td>{{ a['date'] }}</td>
+            <td>
+              {% if a['status'] == 'absent' %}
+                <span class="badge err">غياب</span>
+              {% elif a['status'] == 'late' %}
+                <span class="badge" style="background:rgba(234,179,8,.18);color:#fde68a">تأخر</span>
+              {% else %}
+                <span class="badge ok">حضور</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="2" class="small">لا يوجد سجلات</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
