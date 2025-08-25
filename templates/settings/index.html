@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الإعدادات</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+.input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0a0f1f;color:#e5e7eb}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right}
+.flash{margin:12px 0}.flash .item{padding:10px;border-radius:10px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('classes') }}">الأقسام</a>
+    <a href="{{ url_for('students') }}">التلاميذ</a>
+    <a href="{{ url_for('grades_page') }}">التنقيط</a>
+    <a href="{{ url_for('attendance_page') }}">الحضور والغياب</a>
+    <a href="{{ url_for('reports') }}">التقارير</a>
+    <a href="{{ url_for('settings') }}">الإعدادات</a>
+  </div>
+  <div><a href="{{ url_for('logout') }}">تسجيل الخروج</a></div>
+</nav>
+
+
+
+  <div class="card">
+    <h2>المستخدمون</h2>
+    <form method="post">
+      <input type="hidden" name="form_name" value="user_add">
+      <div class="form-row">
+        <div>
+          <label>اسم المستخدم</label>
+          <input class="input" type="text" name="username" required>
+        </div>
+        <div>
+          <label>كلمة المرور</label>
+          <input class="input" type="password" name="password" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>الدور</label>
+          <select class="input" name="role">
+            <option value="teacher">أستاذ</option>
+            <option value="admin">إدارة</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn" type="submit">إضافة مستخدم</button>
+        </div>
+      </div>
+    </form>
+    <hr>
+    <table class="table">
+      <thead><tr><th>المعرف</th><th>المستخدم</th><th>الدور</th></tr></thead>
+      <tbody>
+        {% for u in users %}<tr><td>{{ u['id'] }}</td><td>{{ u['username'] }}</td><td>{{ u['role'] }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container card" style="margin-top:16px">
+  <h2>تغيير كلمة المرور</h2>
+  <form method="post">
+    <input type="hidden" name="form_name" value="change_password">
+    <div class="form-row">
+      <div>
+        <label>كلمة المرور الحالية</label>
+        <input class="input" type="password" name="old" required>
+      </div>
+      <div>
+        <label>كلمة المرور الجديدة</label>
+        <input class="input" type="password" name="new" required>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" type="submit">تحديث</button></div>
+  </form>
+  <div class="flash">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}{% for cat, msg in msgs %}<div class="item {{cat}}">{{ msg }}</div>{% endfor %}{% endif %}
+    {% endwith %}
+  </div>
+</div>
+</body>
+</html>
