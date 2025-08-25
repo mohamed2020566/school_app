@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حسابي</title>
+<style>
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#0b1228;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav a{color:#e5e7eb;text-decoration:none;margin-inline:8px;padding:6px 10px;border-radius:10px}
+.container{max-width:960px;margin:24px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#0f172a,#111827);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(34,197,94,.15);color:#22c55e}
+.small{font-size:12px;color:#9ca3af}
+.btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);border:none;color:#00121a;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:bold}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div>
+    <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+    <a href="{{ url_for('pricing') }}">الاشتراك</a>
+    <a href="{{ url_for('account') }}">حسابي</a>
+  </div>
+  <div>👤 {{ session.get('username') or session.get('email') }} | <a href="{{ url_for('logout') }}">خروج</a></div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>بيانات الحساب</h1>
+    <p><b>الاسم:</b> {{ user['username'] or '—' }} | <b>الإيميل:</b> {{ user['email'] }}</p>
+    {% if user['trial_ends_at'] %}
+      {% set trial_end = user['trial_ends_at'] %}
+      <p><b>التجربة:</b> حتى {{ trial_end }} {% if sub_active %}- ولديك اشتراك نشط أيضًا{% endif %}</p>
+    {% else %}
+      <p><b>التجربة:</b> غير مستخدمة</p>
+    {% endif %}
+
+    {% if sub_active %}
+      <p class="badge">اشتراك نشط حتى {{ sub_active['current_period_end'] }}</p>
+      {% if sub_active['cancel_at_period_end'] == 0 %}
+        <form method="post" action="{{ url_for('subscribe') }}">
+          <input type="hidden" name="action" value="cancel">
+          <button class="btn" type="submit" style="background:#0a0f1f;color:#e5e7eb;border:1px solid rgba(255,255,255,.1)">إلغاء عند نهاية الفترة</button>
+        </form>
+      {% else %}
+        <p class="small">سيتم الإلغاء عند نهاية الفترة الحالية.</p>
+      {% endif %}
+    {% else %}
+      <p class="small">لا يوجد اشتراك نشط.</p>
+      <form method="post" action="{{ url_for('subscribe') }}">
+        <input type="hidden" name="action" value="pay_month">
+        <button class="btn" type="submit">اشترك الآن</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>سجل الاشتراكات</h2>
+    <table class="table">
+      <thead><tr><th>الحالة</th><th>من</th><th>إلى</th><th>إلغاء عند نهاية الفترة</th></tr></thead>
+      <tbody>
+        {% for s in subs %}
+          <tr>
+            <td>{{ s['status'] }}</td>
+            <td>{{ s['current_period_start'] }}</td>
+            <td>{{ s['current_period_end'] }}</td>
+            <td>{{ 'نعم' if s['cancel_at_period_end'] else 'لا' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="small">لا يوجد سجلات</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
