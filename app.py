@@ -954,6 +954,7 @@ def settings():
 # =============================
 # Entry
 # =============================
-if __name__ == "__main__":
-    init_db()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    # بلا reloader لتفادي تشغيل نسختين → أقفال أكثر
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False, threaded=True)
